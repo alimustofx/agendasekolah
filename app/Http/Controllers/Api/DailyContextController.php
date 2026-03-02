@@ -19,6 +19,7 @@ class DailyContextController extends Controller
         $context = DailyContext::updateOrCreate(
             ['date' => $request->date],
             ['description' => $request->description]
+            
         );
 
         return response()->json([

@@ -33,6 +33,7 @@ class AgendaController extends Controller
             'agendas' => $agendas
         ]);
     }
+    
 
     // 3. CREATE AGENDA BARU
     public function store(Request $request)
@@ -109,23 +110,40 @@ class AgendaController extends Controller
         return response()->json(['success' => true, 'message' => 'Agenda berhasil dihapus!']);
     }
 
+    // UPDATE CONTEXT: Tambahkan penanganan Waka & Guru Piket
     public function updateContext(Request $request)
     {
-        $request->validate([
-            'description' => 'required|string',
-        ]);
+        try {
+            $request->validate([
+                'description' => 'required|string',
+                'waka_status' => 'nullable|array',
+                'guru_piket' => 'nullable|array',
+                'prestasi' => 'nullable|array'
+            ]);
 
-        $today = now()->format('Y-m-d');
+            $today = now()->format('Y-m-d');
 
-        $context = DailyContext::updateOrCreate(
-            ['date' => $today],
-            ['description' => $request->description]
-        );
+            $context = DailyContext::updateOrCreate(
+                ['date' => $today],
+                [
+                    'description' => $request->description,
+                    'waka_status' => $request->waka_status ?? [],
+                    'guru_piket'  => $request->guru_piket ?? [],
+                    'prestasi'    => $request->prestasi ?? [],
+                ]
+            );
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Informasi hari ini berhasil diperbarui!',
-            'data' => $context
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Data berhasil disimpan!',
+                'data' => $context
+            ]);
+        } catch (\Exception $e) {
+            // Jika masih error 500, pesan error aslinya akan muncul di response
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 }
