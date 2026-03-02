@@ -11,7 +11,7 @@ const AdminDashboard = () => {
   const [contextText, setContextText] = useState('');
   const [wakaList, setWakaList] = useState([{ jabatan: '', status: 'Hadir' }]);
   const [piketList, setPiketList] = useState(['', '']); 
-  const [prestasiList, setPrestasiList] = useState([{ kategori: '', judul: '' }]); // State Baru untuk Prestasi
+  const [prestasiList, setPrestasiList] = useState([{ kategori: '', judul: '' }]); 
 
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
@@ -43,7 +43,6 @@ const AdminDashboard = () => {
       if (ctx) {
         setContextText(ctx.description || '');
         
-        // Parsing waka_status
         try {
           if (typeof ctx.waka_status === 'string') {
             const parsedWaka = JSON.parse(ctx.waka_status);
@@ -53,7 +52,6 @@ const AdminDashboard = () => {
           }
         } catch (e) { setWakaList([{ jabatan: '', status: 'Hadir' }]); }
 
-        // Parsing guru_piket
         try {
           if (typeof ctx.guru_piket === 'string') {
             const parsedPiket = JSON.parse(ctx.guru_piket);
@@ -63,7 +61,6 @@ const AdminDashboard = () => {
           }
         } catch (e) { setPiketList(['', '']); }
 
-        // Parsing prestasi (BARU)
         try {
           if (typeof ctx.prestasi === 'string') {
             const parsedPrestasi = JSON.parse(ctx.prestasi);
@@ -92,7 +89,7 @@ const AdminDashboard = () => {
         description: contextText,
         waka_status: wakaList.filter(w => w.jabatan.trim() !== ''),
         guru_piket: piketList.filter(p => p.trim() !== ''),
-        prestasi: prestasiList.filter(p => p.judul.trim() !== '') // Kirim data prestasi
+        prestasi: prestasiList.filter(p => p.judul.trim() !== '' || p.kategori.trim() !== '') // Memastikan data yang tidak kosong terkirim
       }, axiosConfig);
       showToast('Kontrol Harian berhasil diperbarui!', 'success');
       fetchData();
@@ -252,10 +249,10 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              {/* SECTION PRESTASI (BARU) */}
+              {/* SECTION PRESTASI - SEKARANG TANPA LIMIT */}
               <div className="pt-2 border-t border-slate-100">
                 <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                  <Trophy size={12} className="text-amber-500" /> Prestasi Siswa (Max 2)
+                  <Trophy size={12} className="text-amber-500" /> Prestasi Siswa
                 </label>
                 <div className="space-y-3">
                   {prestasiList.map((pres, idx) => (
@@ -281,9 +278,7 @@ const AdminDashboard = () => {
                       />
                     </div>
                   ))}
-                  {prestasiList.length < 2 && (
-                    <button type="button" onClick={() => setPrestasiList([...prestasiList, {kategori:'', judul:''}])} className="w-full py-2 border-2 border-dashed border-slate-200 rounded-xl text-[10px] font-black text-slate-400 hover:border-blue-500 hover:text-blue-500 transition-all">+ TAMBAH PRESTASI</button>
-                  )}
+                  <button type="button" onClick={() => setPrestasiList([...prestasiList, {kategori:'', judul:''}])} className="w-full py-2 border-2 border-dashed border-slate-200 rounded-xl text-[10px] font-black text-slate-400 hover:border-blue-500 hover:text-blue-500 transition-all">+ TAMBAH PRESTASI</button>
                 </div>
               </div>
 
@@ -419,21 +414,6 @@ const AdminDashboard = () => {
                 </div>
               ))}
             </div>
-          </div>
-
-          <div className="mt-8 bg-slate-900 rounded-[2rem] p-8 text-white flex flex-col md:flex-row items-center gap-8 border border-slate-800">
-             <div className="bg-white p-4 rounded-[2rem] shadow-2xl">
-                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://wa.me/6282264928953`} alt="QR" className="w-24 h-24" />
-             </div>
-             <div className="text-center md:text-left space-y-2">
-                <h3 className="font-black text-xl tracking-tight">Butuh Bantuan Teknis?</h3>
-                <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-sm">Scan QR Code ini untuk terhubung dengan Developer Sistem jika ada kendala pada monitor TV atau sinkronisasi data.</p>
-                <div className="pt-2 flex flex-wrap justify-center md:justify-start gap-4">
-                    <div className="flex items-center gap-2 text-[10px] font-black tracking-widest text-blue-400 uppercase">
-                        <QrCode size={14} /> WhatsApp Support
-                    </div>
-                </div>
-             </div>
           </div>
         </div>
       </main>

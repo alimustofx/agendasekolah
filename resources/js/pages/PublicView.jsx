@@ -92,6 +92,12 @@ const PublicView = () => {
           85%, 100% { transform: translateY(calc(-100% + 70px)); }
         }
         .animate-scroll-v { animation: scroll-v 8s ease-in-out infinite alternate; }
+
+        @keyframes scroll-up-infinite {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(-50%); }
+        }
+        .animate-prestasi-continuous { animation: scroll-up-infinite 25s linear infinite; }
       `}</style>
 
       <div className="absolute inset-0 bg-dot-pattern opacity-30 pointer-events-none"></div>
@@ -167,13 +173,16 @@ const PublicView = () => {
             <Trophy className="absolute -right-10 -bottom-10 w-64 h-64 opacity-10 rotate-12 text-amber-400" />
             <div className="relative z-10 flex flex-col h-full">
                 <h3 className="font-black text-2xl uppercase tracking-tighter flex items-center gap-3 text-amber-400 mb-6"><Award size={40} /> Prestasi Smanere</h3>
-                <div className="space-y-4 flex-1 overflow-hidden">
-                    {prestasiData.map((item, i) => (
-                      <div key={i} className={`bg-white/10 backdrop-blur-md border-l-4 ${i % 2 === 0 ? 'border-amber-400' : 'border-blue-400'} p-5 rounded-2xl shadow-lg`}>
-                          <p className="text-amber-400 text-[10px] font-black uppercase tracking-[0.3em] mb-1">{item.kategori}</p>
-                          <h4 className="font-black text-lg leading-tight uppercase italic">🏆 {item.judul}</h4>
-                      </div>
-                    ))}
+                <div className="flex-1 overflow-hidden relative">
+                    {/* Prestasi diduplikasi (cloned) agar scroll tidak putus */}
+                    <div className={`space-y-4 ${prestasiData.length > 2 ? 'animate-prestasi-continuous' : ''}`}>
+                      {[...prestasiData, ...prestasiData].map((item, i) => (
+                        <div key={i} className={`bg-white/10 backdrop-blur-md border-l-4 ${i % 2 === 0 ? 'border-amber-400' : 'border-blue-400'} p-5 rounded-2xl shadow-lg`}>
+                            <p className="text-amber-400 text-[10px] font-black uppercase tracking-[0.3em] mb-1">{item.kategori}</p>
+                            <h4 className="font-black text-lg leading-tight uppercase italic">🏆 {item.judul}</h4>
+                        </div>
+                      ))}
+                    </div>
                 </div>
             </div>
           </div>
@@ -229,14 +238,11 @@ const PublicView = () => {
         </div>
       </main>
 
-      {/* FOOTER: Alignment Teks Disamakan (Huruf 's' sejajar dengan '@') */}
       <footer className="h-[10vh] bg-slate-950 flex items-center overflow-hidden shrink-0 border-t-2 border-slate-800">
         <div className="bg-blue-600 h-full flex items-center px-10 z-20 shadow-2xl shrink-0">
           <div className="flex flex-col justify-center space-y-2">
             
-            {/* BARIS WEBSITE */}
             <div className="flex items-center">
-              {/* Kontainer Ikon dengan lebar tetap agar teks di kanannya sejajar */}
               <div className="w-12 flex justify-start">
                 <Globe size={18} className="text-white" />
               </div>
@@ -245,9 +251,7 @@ const PublicView = () => {
               </span>
             </div>
 
-            {/* BARIS SOSMED */}
             <div className="flex items-center">
-              {/* Kontainer Ikon disamakan lebarnya (w-12) */}
               <div className="w-12 flex items-center gap-1.5 justify-start">
                 <Instagram size={16} className="text-white" />
                 <TikTokIcon size={14} className="text-white" />
