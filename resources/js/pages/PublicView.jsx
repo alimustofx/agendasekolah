@@ -35,19 +35,38 @@ const PublicView = () => {
       try {
         const response = await axios.get('/api/public/today');
         const data = response.data;
-        setAgendas(Array.isArray(data.agendas) ? data.agendas : []);
+        
+        // PEMBETULAN: Hanya update jika data dari API valid dan tidak kosong
+        // Ini mencegah data hilang tiba-tiba di siang hari jika API mengirim respon kosong
+        if (data && data.agendas && data.agendas.length > 0) {
+          setAgendas(data.agendas);
+        }
+
         const ctx = data.context;
         if (ctx) {
           setContext(ctx);
           try {
-            setWakaData(Array.isArray(ctx.waka_status) ? ctx.waka_status : JSON.parse(ctx.waka_status || '[]'));
-            setGuruPiket(Array.isArray(ctx.guru_piket) ? ctx.guru_piket : JSON.parse(ctx.guru_piket || '[]'));
-            setPrestasiData(Array.isArray(ctx.prestasi) ? ctx.prestasi : JSON.parse(ctx.prestasi || '[]'));
-          } catch (e) { console.error(e); }
+            const parsedWaka = Array.isArray(ctx.waka_status) ? ctx.waka_status : JSON.parse(ctx.waka_status || '[]');
+            const parsedPiket = Array.isArray(ctx.guru_piket) ? ctx.guru_piket : JSON.parse(ctx.guru_piket || '[]');
+            const parsedPrestasi = Array.isArray(ctx.prestasi) ? ctx.prestasi : JSON.parse(ctx.prestasi || '[]');
+
+            // Update state hanya jika data hasil parse tidak kosong
+            if (parsedWaka.length > 0) setWakaData(parsedWaka);
+            if (parsedPiket.length > 0) setGuruPiket(parsedPiket);
+            if (parsedPrestasi.length > 0) setPrestasiData(parsedPrestasi);
+            
+          } catch (e) { 
+            console.error("Gagal parsing data context:", e); 
+          }
         }
         setLoading(false);
-      } catch (error) { setLoading(false); }
+      } catch (error) { 
+        // JIKA ERROR: Biarkan data lama tetap ada di layar (jangan set ke kosong)
+        console.error("Gagal mengambil data terbaru:", error);
+        setLoading(false); 
+      }
     };
+    
     fetchData();
     const interval = setInterval(fetchData, 15000);
     return () => clearInterval(interval);
@@ -174,7 +193,6 @@ const PublicView = () => {
             <div className="relative z-10 flex flex-col h-full">
                 <h3 className="font-black text-2xl uppercase tracking-tighter flex items-center gap-3 text-amber-400 mb-6"><Award size={40} /> Prestasi Smanere</h3>
                 <div className="flex-1 overflow-hidden relative">
-                    {/* Prestasi diduplikasi (cloned) agar scroll tidak putus */}
                     <div className={`space-y-4 ${prestasiData.length > 2 ? 'animate-prestasi-continuous' : ''}`}>
                       {[...prestasiData, ...prestasiData].map((item, i) => (
                         <div key={i} className={`bg-white/10 backdrop-blur-md border-l-4 ${i % 2 === 0 ? 'border-amber-400' : 'border-blue-400'} p-5 rounded-2xl shadow-lg`}>
@@ -241,29 +259,18 @@ const PublicView = () => {
       <footer className="h-[10vh] bg-slate-950 flex items-center overflow-hidden shrink-0 border-t-2 border-slate-800">
         <div className="bg-blue-600 h-full flex items-center px-10 z-20 shadow-2xl shrink-0">
           <div className="flex flex-col justify-center space-y-2">
-            
             <div className="flex items-center">
-              <div className="w-12 flex justify-start">
-                <Globe size={18} className="text-white" />
-              </div>
-              <span className="text-white font-bold text-sm lowercase italic leading-none">
-                smanegeri1turen.sch.id
-              </span>
+              <div className="w-12 flex justify-start"><Globe size={18} className="text-white" /></div>
+              <span className="text-white font-bold text-sm lowercase italic leading-none">smanegeri1turen.sch.id</span>
             </div>
-
             <div className="flex items-center">
               <div className="w-12 flex items-center gap-1.5 justify-start">
-                <Instagram size={16} className="text-white" />
-                <TikTokIcon size={14} className="text-white" />
+                <Instagram size={16} className="text-white" /><TikTokIcon size={14} className="text-white" />
               </div>
-              <span className="text-white/90 font-black text-xs tracking-wider leading-none">
-                @sman1turen
-              </span>
+              <span className="text-white/90 font-black text-xs tracking-wider leading-none">@sman1turen</span>
             </div>
-
           </div>
         </div>
-        
         <div className="flex-1 overflow-hidden h-full flex items-center bg-slate-900/50">
           <span className="animate-marquee text-xl font-black text-white uppercase tracking-[0.3em]">
             Terwujudnya Generasi yang Religius, Kompeten, Berprestasi, Berdaya Saing, dan Berwawasan Lingkungan sesuai dengan Perkembangan Global Menuju Sekolah Pariwisata Berbasis Adiwiyata.

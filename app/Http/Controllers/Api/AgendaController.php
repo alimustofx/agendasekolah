@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Agenda;
 use App\Models\DailyContext;
 use Illuminate\Http\Request;
+use Carbon\Carbon; // Menambahkan Carbon untuk pengaturan timezone
 
 class AgendaController extends Controller
 {
@@ -20,7 +21,8 @@ class AgendaController extends Controller
     // 2. GET TODAY'S DATA (Khusus untuk Tampilan Publik / TV Sekolah)
     public function today()
     {
-        $today = now()->format('Y-m-d');
+        // Menggunakan Carbon Asia/Jakarta agar tanggal akurat dengan WIB
+        $today = Carbon::now('Asia/Jakarta')->format('Y-m-d');
         
         $context = DailyContext::where('date', $today)->first();
         $agendas = Agenda::with('items')
@@ -30,7 +32,8 @@ class AgendaController extends Controller
 
         return response()->json([ 
             'context' => $context,
-            'agendas' => $agendas
+            'agendas' => $agendas,
+            'server_date_check' => $today // Membantu pengecekan tanggal di API
         ]);
     }
     
@@ -44,9 +47,9 @@ class AgendaController extends Controller
             'items' => 'required|array',
         ]);
 
-        // Ambil semua data dari input, lalu tambahkan tanggal hari ini secara otomatis
+        // Ambil semua data dari input, lalu tambahkan tanggal hari ini secara otomatis (Jakarta)
         $data = $request->only(['start_time', 'end_time', 'audience', 'location', 'officer']);
-        $data['date'] = now()->format('Y-m-d'); // Set tanggal hari ini
+        $data['date'] = Carbon::now('Asia/Jakarta')->format('Y-m-d'); 
 
         $agenda = Agenda::create($data);
 
@@ -78,7 +81,7 @@ class AgendaController extends Controller
         
         // 3. Pastikan tanggal tetap ada (pakai yang lama atau set hari ini jika kosong)
         if (!$agenda->date) {
-            $data['date'] = now()->format('Y-m-d');
+            $data['date'] = Carbon::now('Asia/Jakarta')->format('Y-m-d');
         }
 
         // 4. Update data utama
@@ -121,7 +124,7 @@ class AgendaController extends Controller
                 'prestasi' => 'nullable|array'
             ]);
 
-            $today = now()->format('Y-m-d');
+            $today = Carbon::now('Asia/Jakarta')->format('Y-m-d');
 
             $context = DailyContext::updateOrCreate(
                 ['date' => $today],
