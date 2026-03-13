@@ -223,7 +223,7 @@ const PublicView = () => {
                             {guruPiket.map((piket, i) => (
                                 <div key={i} className="flex items-center gap-2 bg-indigo-50/50 px-2 py-1.5 rounded-lg border border-indigo-100">
                                     <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full shrink-0"></div>
-                                    <span className="text-[9px] font-bold text-slate-600 uppercase leading-tight">{piket}</span>
+                                    <span className="text-[9px] font-bold text-slate-600 leading-tight">{piket}</span>
                                 </div>
                             ))}
                         </div>
