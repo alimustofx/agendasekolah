@@ -42,11 +42,15 @@ const PublicView = () => {
           try {
             setWakaData(Array.isArray(ctx.waka_status) ? ctx.waka_status : JSON.parse(ctx.waka_status || '[]'));
             setGuruPiket(Array.isArray(ctx.guru_piket) ? ctx.guru_piket : JSON.parse(ctx.guru_piket || '[]'));
-            setPrestasiData(Array.isArray(ctx.prestasi) ? ctx.prestasi : JSON.parse(ctx.prestasi || '[]'));
-          } catch (e) { console.error(e); }
+            const rawPrestasi = Array.isArray(ctx.prestasi) ? ctx.prestasi : JSON.parse(ctx.prestasi || '[]');
+            setPrestasiData(rawPrestasi);
+          } catch (e) { console.error("Parsing error:", e); }
         }
         setLoading(false);
-      } catch (error) { setLoading(false); }
+      } catch (error) { 
+        console.error("Fetch error:", error);
+        setLoading(false); 
+      }
     };
     fetchData();
     const interval = setInterval(fetchData, 15000);
@@ -97,8 +101,8 @@ const PublicView = () => {
           from { transform: translateY(0); }
           to { transform: translateY(-50%); }
         }
-        .animate-prestasi-perfect { 
-          animation: seamless-up 30s linear infinite; 
+        .animate-prestasi-fixed { 
+          animation: seamless-up 25s linear infinite; 
           will-change: transform;
         }
       `}</style>
@@ -151,7 +155,10 @@ const PublicView = () => {
                   </div>
                   <div className="flex-1 p-6 flex flex-col justify-center overflow-hidden">
                       <div className="flex justify-between items-start mb-1">
-                        <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${isFinished ? 'bg-slate-200 text-slate-500' : 'bg-blue-100 text-blue-700'}`}>{agenda.audience || 'Umum'}</span>
+                        {/* BAGIAN YANG DIRUBAH: Audience lebih besar dan berwarna merah */}
+                        <span className={`px-4 py-1.5 rounded-full text-[12px] font-black uppercase tracking-widest shadow-sm ${isFinished ? 'bg-slate-200 text-slate-500' : 'bg-red-600 text-white'}`}>
+                          {agenda.audience || 'Umum'}
+                        </span>
                         <span className={`px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-tighter shadow-sm ${status.color}`}>{status.label}</span>
                       </div>
                       <h3 className="text-2xl font-black uppercase leading-[1.1] tracking-tight whitespace-normal break-words text-slate-800">
@@ -177,10 +184,9 @@ const PublicView = () => {
             <div className="relative z-10 flex flex-col h-full">
                 <h3 className="font-black text-2xl uppercase tracking-tighter flex items-center gap-3 text-amber-400 mb-6"><Award size={40} /> Prestasi Smanere</h3>
                 <div className="flex-1 overflow-hidden relative">
-                    <div className={`flex flex-col gap-4 ${prestasiData.length > 2 ? 'animate-prestasi-perfect' : ''}`}>
-                      {/* Gabungkan data asli + duplikat hanya jika butuh scroll */}
+                    <div className={`flex flex-col gap-4 ${prestasiData.length > 2 ? 'animate-prestasi-fixed' : ''}`}>
                       {(prestasiData.length > 2 ? [...prestasiData, ...prestasiData] : prestasiData).map((item, i) => (
-                        <div key={i} className={`bg-white/10 backdrop-blur-md border-l-4 ${i % prestasiData.length % 2 === 0 ? 'border-amber-400' : 'border-blue-400'} p-5 rounded-2xl shadow-lg shrink-0`}>
+                        <div key={`${item.id || i}-${i}`} className={`bg-white/10 backdrop-blur-md border-l-4 ${i % prestasiData.length % 2 === 0 ? 'border-amber-400' : 'border-blue-400'} p-5 rounded-2xl shadow-lg shrink-0`}>
                             <p className="text-amber-400 text-[10px] font-black uppercase tracking-[0.3em] mb-1">{item.kategori}</p>
                             <h4 className="font-black text-lg leading-tight uppercase italic">🏆 {item.judul}</h4>
                         </div>
